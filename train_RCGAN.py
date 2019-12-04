@@ -297,19 +297,44 @@ class CycleGANTraining:
             ### if it wll be applied should be real 1 with cycle 1 ,,, real2 cycle2 ... real3 cycle3 etc ...
                # cycleLoss = torch.mean(
                #     torch.abs(real_A - cycle_A)) + torch.mean(torch.abs(real_B - cycle_B))
-                
+
+
                 # Generator Identity Loss ... not sure if we will use it
               #  identiyLoss = torch.mean(
                #     torch.abs(real_A - identity_A)) + torch.mean(torch.abs(real_B - identity_B))
 
+
+
+                # our New RADIAL Loss
+
+            ### here is an array of losses or directly with hidden features after addition
+
+            ### should check the dimension before
+
+                radialLoss = torch.mean(
+                         torch.abs(hidden_features - encoded0))  # + torch.mean(torch.abs(real_B - identity_B))
+
                 # Generator Loss
-                generator_loss_A2B = torch.mean((1 - d_fake_B) ** 2)
-                generator_loss_B2A = torch.mean((1 - d_fake_A) ** 2)
+
+                generator_loss_d_fake_0 = torch.mean((1 - d_fake_0) ** 2)
+                generator_loss_d_fake_A = torch.mean((1 - d_fake_A) ** 2)
+                generator_loss_d_fake_B = torch.mean((1 - d_fake_B) ** 2)
+                generator_loss_d_fake_C = torch.mean((1 - d_fake_C) ** 2)
+
+                #generator_loss_A2B = torch.mean((1 - d_fake_B) ** 2)
+                #generator_loss_B2A = torch.mean((1 - d_fake_A) ** 2)
 
                 # Total Generator Loss
-                generator_loss = generator_loss_A2B + generator_loss_B2A + \
-                    cycle_loss_lambda * cycleLoss + identity_loss_lambda * identiyLoss
+
+                generator_loss = generator_loss_d_fake_0 + generator_loss_d_fake_A + generator_loss_d_fake_B  + generator_loss_d_fake_C + \
+                                 radial_loss_lambda  * radialLoss
+
                 self.generator_loss_store.append(generator_loss.item())
+
+                #generator_loss = generator_loss_A2B + generator_loss_B2A + \
+                #    cycle_loss_lambda * cycleLoss + identity_loss_lambda * identiyLoss
+                #self.generator_loss_store.append(generator_loss.item())
+
 
                 # Backprop for Generator
                 self.reset_grad()
@@ -324,17 +349,24 @@ class CycleGANTraining:
                 # Discriminator Loss Function
 
                 # Discriminator Feed Forward
+            ### should we apply generator  again ? ? ?
+            ### i think we should not apply generater again
+
                 d_real_A = self.discriminator_A(real_A)
                 d_real_B = self.discriminator_B(real_B)
 
+                #those should not be calculated again ...
+
                 generated_A = self.generator_B2A(real_B)
                 d_fake_A = self.discriminator_A(generated_A)
+
+                # those also shouldn't be calculated again
 
                 generated_B = self.generator_A2B(real_A)
                 d_fake_B = self.discriminator_B(generated_B)
 
                 # Loss Functions
-                d_loss_A_real` = torch.mean((1 - d_real_A) ** 2)
+                d_loss_A_real = torch.mean((1 - d_real_A) ** 2)
                 d_loss_A_fake = torch.mean((0 - d_fake_A) ** 2)
                 d_loss_A = (d_loss_A_real + d_loss_A_fake) / 2.0
 
