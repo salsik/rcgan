@@ -197,14 +197,30 @@ class CycleGANTraining:
                 # Discriminator Loss Function
 
                 # Discriminator Feed Forward
+                ### should we apply generator  again ? ? ?
+                ### i think we should not apply generater again
+
                 d_real_A = self.discriminator_A(real_A)
                 d_real_B = self.discriminator_B(real_B)
 
-                generated_A = self.generator_B2A(real_B)
-                d_fake_A = self.discriminator_A(generated_A)
+                # those should not be calculated again ...
 
-                generated_B = self.generator_A2B(real_A)
-                d_fake_B = self.discriminator_B(generated_B)
+
+                #mlhash lazma
+               # generated_A = self.generator_B2A(real_B)
+
+
+
+            ### iam not sure about that if we have to calculate d_fake_a again or not because there is a reset grad .. . . . .
+                d_fake_A = self.discriminator_A(fake_A)
+
+                # those also shouldn't be calculated again
+                # mlhash lazma
+                #generated_B = self.generator_A2B(real_A)
+            ### iam not sure about that if we have to calculate d_fake_b again or not because there is a reset grad .. . . . .
+                d_fake_B = self.discriminator_B(fake_B)
+
+
 
                 # Loss Functions
                 d_loss_A_real = torch.mean((1 - d_real_A) ** 2)
