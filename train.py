@@ -207,18 +207,18 @@ class CycleGANTraining:
 
 
                 #mlhash lazma
-               # generated_A = self.generator_B2A(real_B)
+                generated_A = self.generator_B2A(real_B)
 
 
 
             ### iam not sure about that if we have to calculate d_fake_a again or not because there is a reset grad .. . . . .
-                d_fake_A = self.discriminator_A(fake_A)
+                d_fake_A = self.discriminator_A(generated_A)
 
                 # those also shouldn't be calculated again
                 # mlhash lazma
-                #generated_B = self.generator_A2B(real_A)
+                generated_B = self.generator_A2B(real_A)
             ### iam not sure about that if we have to calculate d_fake_b again or not because there is a reset grad .. . . . .
-                d_fake_B = self.discriminator_B(fake_B)
+                d_fake_B = self.discriminator_B(generated_B)
 
 
 
@@ -260,7 +260,6 @@ class CycleGANTraining:
             if epoch % 100 == 0 and epoch != 0:
                 # Save the Entire model
                 print("Saving model Checkpoint  ......")
-                store_to_file = "Saving model Checkpoint  ......"
                 store_to_file = "Saving model Checkpoint  ......"
                 self.store_to_file(store_to_file)
                 self.saveModelCheckPoint(epoch, '{}'.format(
