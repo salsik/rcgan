@@ -11,6 +11,10 @@ from trainingDataset import trainingDataset
 from model_GLU import Generator, Discriminator
 
 
+from torch.autograd import Variable
+
+
+
 class CycleGANTraining:
     def __init__(self,
                  logf0s_normalization,
@@ -209,7 +213,11 @@ class CycleGANTraining:
                 #mlhash lazma
                # generated_A = self.generator_B2A(real_B)
 
+                fake_A= fake_A.detach()
+                fake_B= fake_B.detach()
 
+
+                 
 
             ### iam not sure about that if we have to calculate d_fake_a again or not because there is a reset grad .. . . . .
                 d_fake_A = self.discriminator_A(fake_A)
@@ -431,6 +439,24 @@ class CycleGANTraining:
         return epoch
 
 
+
+def repackage_hidden(h):
+    """Wraps hidden states in new Variables, to detach them from their history."""
+    if type(h) == Variable:
+        return Variable(h.data)
+    else:
+        return tuple(repackage_hidden(v) for v in h)
+
+
+
+if __name__ == '__main2__':
+
+
+    device = torch.device(
+        'cuda' if torch.cuda.is_available() else 'cpu')
+    print(device)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description="Train CycleGAN using source dataset and target dataset")
@@ -440,8 +466,8 @@ if __name__ == '__main__':
     coded_sps_A_norm = '../cache/coded_sps_A_norm.pickle'
     coded_sps_B_norm = '../cache/coded_sps_B_norm.pickle'
     model_checkpoint = '../cache/model_checkpoint/'
-    resume_training_at = '../cache/model_checkpoint/_CycleGAN_CheckPoint'
-    #resume_training_at = None
+    #resume_training_at = '../cache/model_checkpoint/_CycleGAN_CheckPoint'
+    resume_training_at = None
 
     validation_A_dir_default = '../data/vcc2016_training/evaluation_all/SF2/'
     output_A_dir_default = '../data/vcc2016_training/converted_sound/SF2'
