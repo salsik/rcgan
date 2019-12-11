@@ -362,46 +362,92 @@ class CycleGANTraining:
             ### should we apply generator  again ? ? ?
             ### i think we should not apply generater again
 
-                d_real_A = self.discriminator_A(real_A)
-                d_real_B = self.discriminator_B(real_B)
+                d_real_s = []
+                ##d_real_0 = self.discriminator_0(real_0)
+                ##d_real_A = self.discriminator_List[0](real_A)
+                ##d_real_B = self.discriminator_List[1](real_B)
+                ##d_real_C = self.discriminator_List[2](real_C)
+                d_real_s.append(self.discriminator_0(real_0))
+                d_real_s.append(self.discriminator_List[0](real_A))
+                d_real_s.append(self.discriminator_List[1](real_B))
+                d_real_s.append(self.discriminator_List[2](real_C))
 
                 #those should not be calculated again ...
 
-                generated_A = self.generator_B2A(real_B)
-                d_fake_A = self.discriminator_A(generated_A)
+
+
+                    # or we can deatch  fake values then pass it again to disc
+
+                d_fake_s=[]
+
+                ##d_fake_0 = d_fake_0.detach()
+                ##d_fake_A = d_fake_A.detach()
+                ##d_fake_B = d_fake_B.detach()
+                ##d_fake_C = d_fake_C.detach()
+
+                d_fake_s.append(d_fake_0.detach())
+                d_fake_s.append(d_fake_A.detach())
+                d_fake_s.append(d_fake_B.detach())
+                d_fake_s.append(d_fake_C.detach())
+
+
+               # generated_A =   self.generator_B2A(real_B)
+               # d_fake_A = self.discriminator_A(generated_A)
 
                 # those also shouldn't be calculated again
 
-                generated_B = self.generator_A2B(real_A)
-                d_fake_B = self.discriminator_B(generated_B)
+               # generated_B = self.generator_A2B(real_A)
+               # d_fake_B = self.discriminator_B(generated_B)
 
-                # Loss Functions
-                d_loss_A_real = torch.mean((1 - d_real_A) ** 2)
-                d_loss_A_fake = torch.mean((0 - d_fake_A) ** 2)
-                d_loss_A = (d_loss_A_real + d_loss_A_fake) / 2.0
+                # Lossese Functions
 
-                d_loss_B_real = torch.mean((1 - d_real_B) ** 2)
-                d_loss_B_fake = torch.mean((0 - d_fake_B) ** 2)
-                d_loss_B = (d_loss_B_real + d_loss_B_fake) / 2.0
+                d_loss=0
+                for i in range (len(d_real_s)):
+                    d_loss_real = torch.mean((1-d_real_s[i])**2)
+                    d_loss_fake = torch.mean((0-d_fake_s[i])**2)
+                    d_loss += (d_loss_real + d_loss_fake) / 2.0
+
+
+                #d_loss_A_real = torch.mean((1 - d_real_A) ** 2)
+                #d_loss_A_fake = torch.mean((0 - d_fake_A) ** 2)
+                #d_loss_A = (d_loss_A_real + d_loss_A_fake) / 2.0
+
+
+
+                #d_loss_B_real = torch.mean((1 - d_real_B) ** 2)
+                #d_loss_B_fake = torch.mean((0 - d_fake_B) ** 2)
+                #d_loss_B = (d_loss_B_real + d_loss_B_fake) / 2.0
 
                 # Final Loss for discriminator
-                d_loss = (d_loss_A + d_loss_B) / 2.0
+
+                d_loss = d_loss / (len(d_real_s) * 1.0)
+
+                #d_loss = (d_loss_A + d_loss_B) / 2.0
+
                 self.discriminator_loss_store.append(d_loss.item())
 
                 # Backprop for Discriminator
                 self.reset_grad()
                 d_loss.backward()
 
+
                 # if num_iterations > self.start_decay:  # Linearly decay learning rate
                 #     self.adjust_lr_rate(
                 #         self.discriminator_optimizer, name='discriminator')
 
                 self.discriminator_optimizer.step()
+
                 if num_iterations % 50 == 0:
-                    store_to_file = "Iter:{}\t Generator Loss:{:.4f} Discrimator Loss:{:.4f} \tGA2B:{:.4f} GB2A:{:.4f} G_id:{:.4f} G_cyc:{:.4f} D_A:{:.4f} D_B:{:.4f}".format(
-                        num_iterations, generator_loss.item(), d_loss.item(), generator_loss_A2B, generator_loss_B2A, identiyLoss, cycleLoss, d_loss_A, d_loss_B)
-                    print("Iter:{}\t Generator Loss:{:.4f} Discrimator Loss:{:.4f} \tGA2B:{:.4f} GB2A:{:.4f} G_id:{:.4f} G_cyc:{:.4f} D_A:{:.4f} D_B:{:.4f}".format(
-                        num_iterations, generator_loss.item(), d_loss.item(), generator_loss_A2B, generator_loss_B2A, identiyLoss, cycleLoss, d_loss_A, d_loss_B))
+                    #store_to_file = "Iter:{}\t Generator Loss:{:.4f} Discrimator Loss:{:.4f} \tGA2B:{:.4f} GB2A:{:.4f} G_id:{:.4f} G_cyc:{:.4f} D_A:{:.4f} D_B:{:.4f}".format(
+                     #   num_iterations, generator_loss.item(), d_loss.item(), generator_loss_A2B, generator_loss_B2A, identiyLoss, cycleLoss, d_loss_A, d_loss_B)
+                    #print("Iter:{}\t Generator Loss:{:.4f} Discrimator Loss:{:.4f} \tGA2B:{:.4f} GB2A:{:.4f} G_id:{:.4f} G_cyc:{:.4f} D_A:{:.4f} D_B:{:.4f}".format(
+                    #    num_iterations, generator_loss.item(), d_loss.item(), generator_loss_A2B, generator_loss_B2A, identiyLoss, cycleLoss, d_loss_A, d_loss_B))
+
+                    store_to_file = "Iter:{}\t Generator Loss:{:.4f} Discrimator Loss:{:.4f} \t radial:{:.4f}".format(
+                       num_iterations, generator_loss.item(), d_loss.item(), radialLoss)
+                    print("Iter:{}\t Generator Loss:{:.4f} Discrimator Loss:{:.4f} \t radial:{:.4f}".format(
+                        num_iterations, generator_loss.item(), d_loss.item(), radialLoss))
+
                     self.store_to_file(store_to_file)
             end_time = time.time()
             store_to_file = "Epoch: {} Generator Loss: {:.4f} Discriminator Loss: {}, Time: {:.2f}\n\n".format(
@@ -410,21 +456,20 @@ class CycleGANTraining:
             print("Epoch: {} Generator Loss: {:.4f} Discriminator Loss: {}, Time: {:.2f}\n\n".format(
                 epoch, generator_loss.item(), d_loss.item(), end_time - start_time_epoch))
 
-            if epoch % 100 == 0 and epoch != 0:
+            if epoch % 100 == 0  and epoch != 0:
                 # Save the Entire model
                 print("Saving model Checkpoint  ......")
                 store_to_file = "Saving model Checkpoint  ......"
-                self.store_to_file(
-                        )
+                self.store_to_file(store_to_file)
                 self.saveModelCheckPoint(epoch, '{}'.format(
-                    self.modelCheckpoint + '_CycleGAN_CheckPoint'))
+                   self.modelCheckpoint + '_CycleGAN_CheckPoint'))
                 print("Model Saved!")
 
             if epoch % 100 == 0 and epoch != 0:
                 # Validation Set
                 validation_start_time = time.time()
-                self.validation_for_A_dir()
-                self.validation_for_B_dir()
+                self.validation_from_to_dir(epoch,1,3)
+                self.validation_from_to_dir(epoch,2,1)
                 validation_end_time = time.time()
                 store_to_file = "Time taken for validation Set: {}".format(
                     validation_end_time - validation_start_time)
@@ -432,7 +477,7 @@ class CycleGANTraining:
                 print("Time taken for validation Set: {}".format(
                     validation_end_time - validation_start_time))
 
-    def validation_for_A_dir(self):
+    def validation_for_A_dir(self,epoch=100):
         num_mcep = 24
         sampling_rate = 16000
         frame_period = 5.0
@@ -481,19 +526,28 @@ class CycleGANTraining:
                                                                 ap=ap,
                                                                 fs=sampling_rate,
                                                                 frame_period=frame_period)
-            librosa.output.write_wav(path=os.path.join(output_A_dir, os.path.basename(file)),
+            librosa.output.write_wav(path=os.path.join(output_A_dir,"epoch_"+str(epoch) + "_"+ os.path.basename(file)),
                                      y=wav_transformed,
                                      sr=sampling_rate)
 
-    def validation_for_B_dir(self):
+
+        # from sm2 to tf1 .. .from 1 to 3
+    def validation_from_to_dir(self,epoch=100,from_=1,to=3):
         num_mcep = 24
         sampling_rate = 16000
         frame_period = 5.0
         n_frames = 128
-        validation_B_dir = self.validation_B_dir
-        output_B_dir = self.output_B_dir
+        # data are SF2 SM2 TM3 TF1
 
-        print("Generating Validation Data A from B...")
+        persons=["SF2","SM2","TM3","TF1"]
+
+
+        validation_B_dir = self.validation_S_dir +"/" + persons[from_]+"/"
+     ### this shhould be out A , the converted voice ... .
+        output_B_dir = self.output_S_dir +"/" + persons[from_]+"/"
+
+        print("Generating Validation Data "+ persons[to] +" from " + persons[from_])
+        #print("Generating Validation Data A from B...")
         for file in os.listdir(validation_B_dir):
             filePath = os.path.join(validation_B_dir, file)
             wav, _ = librosa.load(filePath, sr=sampling_rate, mono=True)
@@ -504,15 +558,15 @@ class CycleGANTraining:
             f0, timeaxis, sp, ap = preprocess.world_decompose(
                 wav=wav, fs=sampling_rate, frame_period=frame_period)
             f0_converted = preprocess.pitch_conversion(f0=f0,
-                                                       mean_log_src=self.log_f0s_mean_B,
-                                                       std_log_src=self.log_f0s_std_B,
-                                                       mean_log_target=self.log_f0s_mean_A,
-                                                       std_log_target=self.log_f0s_std_A)
+                                                       mean_log_src=self.log_f0s_mean_S[from_],
+                                                       std_log_src=self.log_f0s_std_S[from_],
+                                                       mean_log_target=self.log_f0s_mean_S[to],
+                                                       std_log_target=self.log_f0s_std_S[to])
             coded_sp = preprocess.world_encode_spectral_envelop(
                 sp=sp, fs=sampling_rate, dim=num_mcep)
             coded_sp_transposed = coded_sp.T
             coded_sp_norm = (coded_sp_transposed -
-                             self.coded_sps_B_mean) / self.coded_sps_B_std
+                             self.coded_sps_S_mean[from_]) / self.coded_sps_S_std[from_]
             coded_sp_norm = np.array([coded_sp_norm])
 
             if torch.cuda.is_available():
@@ -520,11 +574,12 @@ class CycleGANTraining:
             else:
                 coded_sp_norm = torch.from_numpy(coded_sp_norm).float()
 
-            coded_sp_converted_norm = self.generator_B2A(coded_sp_norm)
+            coded_sp_converted_norm = self.decoder_List[from_-1](self.encoder_List[from_-1](coded_sp_norm))
+           # coded_sp_converted_norm = self.generator_B2A(coded_sp_norm)
             coded_sp_converted_norm = coded_sp_converted_norm.cpu().detach().numpy()
             coded_sp_converted_norm = np.squeeze(coded_sp_converted_norm)
             coded_sp_converted = coded_sp_converted_norm * \
-                self.coded_sps_A_std + self.coded_sps_A_mean
+                self.coded_sps_S_std[to] + self.coded_sps_S_mean[to]
             coded_sp_converted = coded_sp_converted.T
             coded_sp_converted = np.ascontiguousarray(coded_sp_converted)
             decoded_sp_converted = preprocess.world_decode_spectral_envelop(
@@ -534,7 +589,7 @@ class CycleGANTraining:
                                                                 ap=ap,
                                                                 fs=sampling_rate,
                                                                 frame_period=frame_period)
-            librosa.output.write_wav(path=os.path.join(output_B_dir, os.path.basename(file)),
+            librosa.output.write_wav(path=os.path.join(output_B_dir,"epoch_"+str(epoch) +"_"+ os.path.basename(file)),
                                      y=wav_transformed,
                                      sr=sampling_rate)
 
@@ -556,24 +611,30 @@ class CycleGANTraining:
             'epoch': epoch,
             'generator_loss_store': self.generator_loss_store,
             'discriminator_loss_store': self.discriminator_loss_store,
-            'model_genA2B_state_dict': self.generator_A2B.state_dict(),
-            'model_genB2A_state_dict': self.generator_B2A.state_dict(),
-            'model_discriminatorA': self.discriminator_A.state_dict(),
-            'model_discriminatorB': self.discriminator_B.state_dict(),
+            'model_enc0_state_dict': self.enc_0.state_dict(),
+            'model_encoderlist_state_dict': self.encoder_List,
+            'model_dec0_state_dict': self.dec_0.state_dict(),
+            'model_decoderlist_state_dict': self.decoder_List,
+            'model_discriminator0': self.discriminator_0.state_dict(),
+            'model_discriminatorList': self.discriminator_List,
             'generator_optimizer': self.generator_optimizer.state_dict(),
             'discriminator_optimizer': self.discriminator_optimizer.state_dict()
         }, PATH)
 
     def loadModel(self, PATH):
         checkPoint = torch.load(PATH)
-        self.generator_A2B.load_state_dict(
-            state_dict=checkPoint['model_genA2B_state_dict'])
-        self.generator_B2A.load_state_dict(
-            state_dict=checkPoint['model_genB2A_state_dict'])
-        self.discriminator_A.load_state_dict(
-            state_dict=checkPoint['model_discriminatorA'])
-        self.discriminator_B.load_state_dict(
-            state_dict=checkPoint['model_discriminatorB'])
+        self.enc_0.load_state_dict(
+            state_dict=checkPoint['model_enc0_state_dict'])
+        self.encoder_List =(
+            checkPoint['model_encoderlist_state_dict'])
+        self.dec_0.load_state_dict(
+            state_dict=checkPoint['model_dec0_state_dict'])
+        self.decoder_List =(
+            checkPoint['model_decoderlist_state_dict'])
+        self.discriminator_0.load_state_dict(
+            state_dict=checkPoint['model_discriminator0'])
+        self.discriminator_List =(
+            checkPoint['model_discriminatorList'])
         self.generator_optimizer.load_state_dict(
             state_dict=checkPoint['generator_optimizer'])
         self.discriminator_optimizer.load_state_dict(
@@ -584,7 +645,7 @@ class CycleGANTraining:
         return epoch
 
 
-if __name__ == '__main__':
+if __name__ == '__main3__':
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -600,7 +661,7 @@ if __name__ == '__main__':
         print (enc.label)
 
 
-if __name__ == '__main2__':
+if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description="Train CycleGAN using source dataset and target dataset")
 
@@ -619,7 +680,7 @@ if __name__ == '__main2__':
 
 
     model_checkpoint = '../cache_RCGan/model_checkpoint/'
-    resume_training_at = '../cache_RCGan/model_checkpoint/_CycleGAN_CheckPoint'
+    #resume_training_at = '../cache_RCGan/model_checkpoint/_CycleGAN_CheckPoint'
     resume_training_at = None
 
     #validation_A_dir_default = '../data/vcc2016_training/evaluation_rcgan/SF2/'
@@ -674,6 +735,6 @@ if __name__ == '__main2__':
                                 coded_sps_S_norm=coded_sps_S_norm,
                                 model_checkpoint=model_checkpoint,
                                 validation_S_dir=validation_S_dir,
-                                output_A_dir=output_S_dir,
+                                output_S_dir=output_S_dir,
                                 restart_training_at=resume_training_at)
     cycleGAN.train()
