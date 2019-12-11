@@ -235,7 +235,6 @@ class CycleGANTraining:
 
 
 
-
                 #start encoding
 
                 encoded_A = self.encoder_List[0](real_A)
