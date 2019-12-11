@@ -106,7 +106,8 @@ class trainingRCGANDataset(Dataset):
         for elem in train_data_idx_subset:
             train_data_temp=list()
             for idx_A in zip(elem):
-                data_A = _datasets[k][idx_A]
+               # print(idx_A)
+                data_A = _datasets[k][int(idx_A[0])]
                 frames_A_total = data_A.shape[1]
                 assert frames_A_total >= n_frames
                 start_A = np.random.randint(frames_A_total - n_frames + 1)
