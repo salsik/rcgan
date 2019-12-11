@@ -236,7 +236,6 @@ class CycleGANTraining:
 
 
 
-
                 #start encoding
 
                 encoded_A = self.encoder_List[0](real_A)
@@ -246,10 +245,17 @@ class CycleGANTraining:
                 #hidden features should be resblocks
 
             ###  is it a sum here or i think it should be an array of features for each user and then we make the radial loss through it
-                hidden_features = encoded_A + encoded_B + encoded_C
+                hidden_features =[]
+                hidden_features.append(encoded_A)
+                hidden_features.append(encoded_B)
+                hidden_features.append(encoded_C)
 
                 #decoding and we are still in generator
-                decoded0 = self.dec_0(hidden_features)
+
+                decoded0=0
+                for hidden in hidden_features:
+                    decoded0 += self.dec_0(hidden)
+
                 fake_0 = decoded0
 
                 # HERE WE HSOULD COMPUTE GENERATOR LOSS functions and also loss from disc where the gen should fool the disc
@@ -311,8 +317,13 @@ class CycleGANTraining:
 
             ### should check the dimension before
 
-                radialLoss = torch.mean(
-                         torch.abs(hidden_features - encoded0))  # + torch.mean(torch.abs(real_B - identity_B))
+                radial_loss=0
+                for hidden in hidden_features:
+                    radial_loss += torch.mean(torch.abs(hidden - encoded0))
+                    
+
+                #radialLoss = torch.mean(
+                 #        torch.abs(hidden_features - encoded0))  # + torch.mean(torch.abs(real_B - identity_B))
 
                 # Generator Loss
 
