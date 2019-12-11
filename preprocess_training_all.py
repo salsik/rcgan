@@ -38,7 +38,13 @@ def preprocess_for_training(train_A_dir, cache_folder):
     log_f0s_mean_A, log_f0s_std_A = preprocess.logf0_statistics(f0s=f0s_A)
     # log_f0s_mean_B, log_f0s_std_B = preprocess.logf0_statistics(f0s=f0s_B)
 
-    print("Log Pitch")
+
+
+
+    username= os.path.basename(os.path.normpath(train_A_dir))
+
+
+    print("Log Pitch : "+username)
     print("Mean: {:.4f}, Std: {:.4f}".format(log_f0s_mean_A, log_f0s_std_A))
     #print("Log Pitch B")
     #print("Mean: {:.4f}, Std: {:.4f}".format(log_f0s_mean_B, log_f0s_std_B))
@@ -54,17 +60,17 @@ def preprocess_for_training(train_A_dir, cache_folder):
     if not os.path.exists(cache_folder):
         os.makedirs(cache_folder)
 
-    username= os.path.basename(os.path.normpath(train_A_dir))
 
+    # we can split them and we can put them together
+    np.savez(os.path.join(cache_folder, 'logf0s_mcep_normalization_'+username +'.npz'),
+             mean_logf0=log_f0s_mean_A,
+             std_logf0=log_f0s_std_A,
+             mean_mcep=coded_sps_A_mean,
+             std_mcep=coded_sps_A_std)
 
-    # maybe we can put all this info in one file later
-    np.savez(os.path.join(cache_folder, 'logf0s_normalization_'+username +'.npz'),
-             mean_A=log_f0s_mean_A,
-             std_A=log_f0s_std_A)
-
-    np.savez(os.path.join(cache_folder, 'mcep_normalization_'+username +'.npz'),
-             mean_A=coded_sps_A_mean,
-             std_A=coded_sps_A_std)
+    #np.savez(os.path.join(cache_folder, 'mcep_normalization_'+username +'.npz'),
+     #        mean_A=coded_sps_A_mean,
+      #       std_A=coded_sps_A_std)
 
 
     save_pickle(variable=coded_sps_A_norm,
@@ -93,7 +99,21 @@ if __name__ == '__main__':
     argv = parser.parse_args()
 
     train_A_dir = argv.train_A_dir
-    train_B_dir = argv.train_B_dir
+
     cache_folder = argv.cache_folder
 
-    preprocess_for_training(train_A_dir, cache_folder)
+    train_A_dir_arr = []
+    train_A_dir_arr.append('../data/vcc2016_training/SF1/')
+    train_A_dir_arr.append('../data/vcc2016_training/SF2/')
+    train_A_dir_arr.append('../data/vcc2016_training/SF3/')
+    train_A_dir_arr.append('../data/vcc2016_training/SM1/')
+    train_A_dir_arr.append('../data/vcc2016_training/SM2/')
+    train_A_dir_arr.append('../data/vcc2016_training/TF1/')
+    train_A_dir_arr.append('../data/vcc2016_training/TF2/')
+    train_A_dir_arr.append('../data/vcc2016_training/TM1/')
+    train_A_dir_arr.append('../data/vcc2016_training/TM2/')
+    train_A_dir_arr.append('../data/vcc2016_training/TM3/')
+
+
+    for train_dir in train_A_dir_arr:
+        preprocess_for_training(train_dir, cache_folder)
