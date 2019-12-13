@@ -36,7 +36,6 @@ def preprocess_for_training(train_A_dir, cache_folder):
      #   wave=wavs_B, fs=sampling_rate, frame_period=frame_period, coded_dim=num_mcep)
 
     log_f0s_mean_A, log_f0s_std_A = preprocess.logf0_statistics(f0s=f0s_A)
-    # log_f0s_mean_B, log_f0s_std_B = preprocess.logf0_statistics(f0s=f0s_B)
 
 
 
@@ -46,16 +45,12 @@ def preprocess_for_training(train_A_dir, cache_folder):
 
     print("Log Pitch : "+username)
     print("Mean: {:.4f}, Std: {:.4f}".format(log_f0s_mean_A, log_f0s_std_A))
-    #print("Log Pitch B")
-    #print("Mean: {:.4f}, Std: {:.4f}".format(log_f0s_mean_B, log_f0s_std_B))
 
     coded_sps_A_transposed = preprocess.transpose_in_list(lst=coded_sps_A)
-    #coded_sps_B_transposed = preprocess.transpose_in_list(lst=coded_sps_B)
 
     coded_sps_A_norm, coded_sps_A_mean, coded_sps_A_std = preprocess.coded_sps_normalization_fit_transform(
         coded_sps=coded_sps_A_transposed)
-    #coded_sps_B_norm, coded_sps_B_mean, coded_sps_B_std = preprocess.coded_sps_normalization_fit_transform(
-    #    coded_sps=coded_sps_B_transposed)
+
 
     if not os.path.exists(cache_folder):
         os.makedirs(cache_folder)
