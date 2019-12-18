@@ -1,4 +1,28 @@
 
+
+
+
+
+//////////////////////////////////////
+
+this training was made for 160 samples with changing some parametres like this
+
+  # Initial learning rates
+
+        self.generator_lr = 0.0005  # before was 0.0002
+        self.discriminator_lr = 0.0003 # before was 0.0001
+
+
+
+        # Constants
+        cycle_loss_lambda = 10
+        identity_loss_lambda = 5
+        radial_loss_lambda = 22  ### before was 7
+
+
+/////////////////////////////////////
+
+
 Iter:0	 Generator Loss:49.7679 Discrimator Loss:0.5572 	 radial:1.6064 G_cyc:0.8199 G_id:0.8199
 Iter:50	 Generator Loss:15.4150 Discrimator Loss:0.4825 	 radial:0.1686 G_cyc:0.7718 G_id:0.7808
 Iter:100	 Generator Loss:14.7182 Discrimator Loss:0.5032 	 radial:0.1301 G_cyc:0.7890 G_id:0.7872

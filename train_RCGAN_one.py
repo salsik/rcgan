@@ -144,6 +144,7 @@ class CycleGANTraining:
 
 
         # Initial learning rates
+
         self.generator_lr = 0.0005  # before was 0.0002
         self.discriminator_lr = 0.0003 # before was 0.0001
 
@@ -209,6 +210,7 @@ class CycleGANTraining:
             cycle_loss_lambda = 10
             identity_loss_lambda = 5
             radial_loss_lambda = 22
+
 
 
             # Preparing Dataset 162 voice sample as defined first
@@ -484,16 +486,18 @@ class CycleGANTraining:
                    self.modelCheckpoint + '_CycleGAN_CheckPoint'))
                 print("Model Saved!")
 
+
             if epoch % 100 == 0 and epoch != 0:
                 # Validation Set
                 validation_start_time = time.time()
 
                 # just to rememebr persons are like this , so we pass user id ragarding to this array
 
+
                 ###persons = ["SF1", "SF2", "SF3", "SM1", "SM2", "tf1", "TF2", "TM1", "TM2", "TM3"]
 
-
                 ###persons = ["SM2", "TF2", "SF2"]  # this is the  order of inserting to lists
+                ###persons = ["SF2", "SM2", "TM2"]  # this is the  order of inserting to lists
 
                 # we are converintng new voices from 2 which is TM2 to the person we trained for which is SM2
                 self.validation_from_to_dir(epoch,2,1)
@@ -569,7 +573,11 @@ class CycleGANTraining:
         # data are SF2 SM2 TM3 TF1
 
         persons=["SF1","SF2","SF3","SM1","SM2","tf1","TF2","TM1","TM2","TM3"]
-        persons=["SM2","TF2","SF2"]  # this is the  order of inserting to lists
+
+        #persons=["SM2","TF2","SF2"]  # this is the  order of inserting to lists
+
+        persons=["SF2","SM2","TM2"]  # this is the  order of inserting to lists
+
 
 
         validation_B_dir = self.validation_S_dir +"/" + persons[from_]+"/"
@@ -695,7 +703,6 @@ if __name__ == '__main3__':
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description="Train CycleGAN using source dataset and target dataset")
-
 
     logf0s_mcep_normalization_default = '../cache_all/logf0s_mcep_normalization_SM2.npz'
     logf0s_mcep_normalization_traineduser = '../cache_all/logf0s_mcep_normalization_TF2.npz'
