@@ -482,6 +482,7 @@ class CycleGANTraining:
                    self.modelCheckpoint + '_CycleGAN_CheckPoint'))
                 print("Model Saved!")
 
+
             if epoch % 10 == 0 and epoch != 0:
 
                 # Validation Set
