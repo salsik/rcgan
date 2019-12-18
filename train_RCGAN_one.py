@@ -482,7 +482,8 @@ class CycleGANTraining:
                    self.modelCheckpoint + '_CycleGAN_CheckPoint'))
                 print("Model Saved!")
 
-            if epoch % 10 == 0 and epoch != 0:
+            if epoch % 100 == 0 and epoch != 0:
+
                 # Validation Set
                 validation_start_time = time.time()
 
@@ -703,8 +704,8 @@ if __name__ == '__main__':
 
 
     model_checkpoint = '../cache_all/model_checkpoint/'
-    #resume_training_at = '../cache_RCGan/model_checkpoint/_CycleGAN_CheckPoint'
-    resume_training_at = None
+    resume_training_at = '../cache_all/model_checkpoint/_CycleGAN_CheckPoint'
+    #resume_training_at = None
 
     #validation_A_dir_default = '../data/vcc2016_training/evaluation_rcgan/SF2/'
     #output_A_dir_default = '../data/vcc2016_training/converted_sound_RCGAN/SF2'
