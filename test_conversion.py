@@ -115,7 +115,8 @@ if __name__ == '__main__':
     #wav, _ = librosa.load(filePath, sr=sampling_rate, mono=True)
     #wav_original = wav
 
-    #wav = preprocess.wav_padding(wav=wav,sr=sampling_rate,frame_period=frame_period,multiple=4)
+    #wav = preprocess.wav_padding(wav=wav,sr=sampling_rate,frame_pe
+    # riod=frame_period,multiple=4)
 
     #f0, timeaxis, sp, ap = preprocess.world_decompose(wav=wav, fs=sampling_rate, frame_period=frame_period)
    # coded_sp = preprocess.world_encode_spectral_envelop(sp=sp, fs=sampling_rate, dim=num_mcep)
