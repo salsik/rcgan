@@ -482,7 +482,7 @@ class CycleGANTraining:
                    self.modelCheckpoint + '_CycleGAN_CheckPoint'))
                 print("Model Saved!")
 
-            if epoch % 100 == 0 and epoch != 0:
+            if epoch % 10 == 0 and epoch != 0:
 
                 # Validation Set
                 validation_start_time = time.time()
@@ -693,19 +693,19 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description="Train CycleGAN using source dataset and target dataset")
 
-    logf0s_mcep_normalization_default = '../cache_all/logf0s_mcep_normalization_SF2.npz'
-    logf0s_mcep_normalization_traineduser = '../cache_all/logf0s_mcep_normalization_SM2.npz'
-    logf0s_mcep_normalization_newuser = '../cache_all/logf0s_mcep_normalization_TF2.npz'
-    coded_sps_0_norm = '../cache_all/coded_sps_norm_SF2.pickle'
-    coded_sps_user_norm = '../cache_all/coded_sps_norm_SM2.pickle'
+    logf0s_mcep_normalization_default = '../cache_all_50/logf0s_mcep_normalization_SF2.npz'
+    logf0s_mcep_normalization_traineduser = '../cache_all_50/logf0s_mcep_normalization_SM2.npz'
+    logf0s_mcep_normalization_newuser = '../cache_all_50/logf0s_mcep_normalization_TF2.npz'
+    coded_sps_0_norm = '../cache_all_50/coded_sps_norm_SF2.pickle'
+    coded_sps_user_norm = '../cache_all_50/coded_sps_norm_SM2.pickle'
 
-    coded_sps_newuser_norm = '../cache_all/coded_sps_norm_TF2.pickle'
+    coded_sps_newuser_norm = '../cache_all_50/coded_sps_norm_TF2.pickle'
 
 
 
-    model_checkpoint = '../cache_all/model_checkpoint/'
-    resume_training_at = '../cache_all/model_checkpoint/_CycleGAN_CheckPoint'
-    #resume_training_at = None
+    model_checkpoint = '../cache_all_50/model_checkpoint/'
+    #resume_training_at = '../cache_all_50/model_checkpoint/_CycleGAN_CheckPoint'
+    resume_training_at = None
 
     #validation_A_dir_default = '../data/vcc2016_training/evaluation_rcgan/SF2/'
     #output_A_dir_default = '../data/vcc2016_training/converted_sound_RCGAN/SF2'

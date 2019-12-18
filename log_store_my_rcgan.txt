@@ -31833,3 +31833,18 @@ Iter:809950	 Generator Loss:3.2711 Discrimator Loss:0.5102 	 radial:0.0021 G_cyc
 Epoch: 4999 Generator Loss: 3.9507 Discriminator Loss: 0.5096272230148315, Time: 50.47
 
 
+Iter:0	 Generator Loss:34.3136 Discrimator Loss:0.5917 	 radial:2.7933 G_cyc:0.8436 G_id:0.8407
+Epoch: 0 Generator Loss: 18.2735 Discriminator Loss: 0.669223427772522, Time: 15.26
+
+
+Iter:50	 Generator Loss:16.5380 Discrimator Loss:0.7325 	 radial:0.6195 G_cyc:0.7704 G_id:0.7807
+Epoch: 1 Generator Loss: 15.7866 Discriminator Loss: 0.5443917512893677, Time: 14.95
+
+
+Time taken for validation Set: 33.72313904762268
+Iter:100	 Generator Loss:15.3965 Discrimator Loss:0.6086 	 radial:0.4041 G_cyc:0.8186 G_id:0.8296
+Epoch: 2 Generator Loss: 14.2718 Discriminator Loss: 0.5726736187934875, Time: 14.44
+
+
+Time taken for validation Set: 33.62107706069946
+Iter:150	 Generator Loss:13.4891 Discrimator Loss:0.6100 	 radial:0.2546 G_cyc:0.7693 G_id:0.7755
