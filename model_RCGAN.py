@@ -261,7 +261,7 @@ class Decoder(nn.Module):
                                             stride=1,
                                             padding=2)
 
-        self.upSample2 = upSample_Generator(in_channels=1024 // 2,
+        self.upSample2 = upSample_Generator(in_channels=1024,
                                             out_channels=512,
                                             kernel_size=5,
                                             stride=1,
