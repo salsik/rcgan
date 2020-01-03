@@ -574,7 +574,7 @@ class CycleGANTraining:
             else:
                 coded_sp_norm = torch.from_numpy(coded_sp_norm).float()
 
-            coded_sp_converted_norm = self.decoder_List[from_-1](self.encoder_List[from_-1](coded_sp_norm))
+            coded_sp_converted_norm = self.decoder_List[to-1](self.encoder_List[to-1](coded_sp_norm))
            # coded_sp_converted_norm = self.generator_B2A(coded_sp_norm)
             coded_sp_converted_norm = coded_sp_converted_norm.cpu().detach().numpy()
             coded_sp_converted_norm = np.squeeze(coded_sp_converted_norm)

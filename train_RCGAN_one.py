@@ -7,15 +7,13 @@ import librosa
 import pickle
 
 import preprocess
-from tensorflow.contrib.seq2seq import Decoder
+
 from trainingDataset import trainingDataset
 
 from trainingDataset import trainingRCGANDataset
 
-from model_GLU import Generator, Discriminator
 
-
-from model_RCGAN import Encoder, Decoder
+from model_RCGAN import Encoder, Decoder ,Discriminator
 
 
 class CycleGANTraining:
@@ -46,22 +44,22 @@ class CycleGANTraining:
         self.device = torch.device(
             'cuda' if torch.cuda.is_available() else 'cpu')
 
-        # Speech Parameters
+        # Speech Parameters   /// zero .. from .. to  ( we train on the "to" index  which is the trainuser)
         logf0s_mcep_norm_zero = np.load(logf0s_mcep_normalization_zero)
-        logf0s_mcep_norm_user = np.load(logf0s_mcep_normalization_traineduser)
         logf0s_mcep_norm_newuser = np.load(logf0s_mcep_normalization_newuser)
+        logf0s_mcep_norm_user = np.load(logf0s_mcep_normalization_traineduser)
 
         self.log_f0s_mean_S =[]
         self.log_f0s_std_S =[]
 
 
         self.log_f0s_mean_S.append(logf0s_mcep_norm_zero['mean_logf0'])
-        self.log_f0s_mean_S.append(logf0s_mcep_norm_user['mean_logf0'])
         self.log_f0s_mean_S.append(logf0s_mcep_norm_newuser['mean_logf0'])
+        self.log_f0s_mean_S.append(logf0s_mcep_norm_user['mean_logf0'])
 
         self.log_f0s_std_S.append(logf0s_mcep_norm_zero['std_logf0'])
-        self.log_f0s_std_S.append(logf0s_mcep_norm_user['std_logf0'])
         self.log_f0s_std_S.append(logf0s_mcep_norm_newuser['std_logf0'])
+        self.log_f0s_std_S.append(logf0s_mcep_norm_user['std_logf0'])
 
         #self.log_f0s_mean_A = logf0s_normalization['mean_A']
         #self.log_f0s_std_A = logf0s_normalization['std_A']
@@ -75,12 +73,12 @@ class CycleGANTraining:
 
 
         self.coded_sps_S_mean.append(logf0s_mcep_norm_zero['mean_mcep'])
-        self.coded_sps_S_mean.append(logf0s_mcep_norm_user['mean_mcep'])
         self.coded_sps_S_mean.append(logf0s_mcep_norm_newuser['mean_mcep'])
+        self.coded_sps_S_mean.append(logf0s_mcep_norm_user['mean_mcep'])
 
         self.coded_sps_S_std.append(logf0s_mcep_norm_zero['std_mcep'])
-        self.coded_sps_S_std.append(logf0s_mcep_norm_user['std_mcep'])
         self.coded_sps_S_std.append(logf0s_mcep_norm_newuser['std_mcep'])
+        self.coded_sps_S_std.append(logf0s_mcep_norm_user['std_mcep'])
 
        #self.coded_sps_A_mean = mcep_normalization['mean_A']
         #self.coded_sps_A_std = mcep_normalization['std_A']
@@ -445,7 +443,7 @@ class CycleGANTraining:
 
                 # Final Loss for discriminator
 
-                d_loss = d_loss / (len(d_real_s) * 1.0)
+                d_loss = d_loss # no dividing here # / (len(d_real_s) * 1.0)
 
                 #d_loss = (d_loss_A + d_loss_B) / 2.0
 
@@ -487,7 +485,7 @@ class CycleGANTraining:
                 print("Model Saved!")
 
 
-            if epoch % 100 == 0 and epoch != 0:
+            if epoch % 10 == 0 and epoch != 0:
                 # Validation Set
                 validation_start_time = time.time()
 
@@ -500,7 +498,7 @@ class CycleGANTraining:
                 ###persons = ["SF2", "SM2", "TM2"]  # this is the  order of inserting to lists
 
                 # we are converintng new voices from 2 which is TM2 to the person we trained for which is SM2
-                self.validation_from_to_dir(epoch,2,1)
+                self.validation_from_to_dir(epoch,1,2)
 
                 #self.validation_from_to_dir(epoch,6,4)
                 validation_end_time = time.time()
@@ -510,61 +508,7 @@ class CycleGANTraining:
                 print("Time taken for validation Set: {}".format(
                     validation_end_time - validation_start_time))
 
-    def validation_for_A_dir(self,epoch=100):
-        num_mcep = 24
-        sampling_rate = 16000
-        frame_period = 5.0
-        n_frames = 128
-        validation_A_dir = self.validation_A_dir
-        output_A_dir = self.output_A_dir
 
-        print("Generating Validation Data B from A...")
-        for file in os.listdir(validation_A_dir):
-            filePath = os.path.join(validation_A_dir, file)
-            wav, _ = librosa.load(filePath, sr=sampling_rate, mono=True)
-            wav = preprocess.wav_padding(wav=wav,
-                                         sr=sampling_rate,
-                                         frame_period=frame_period,
-                                         multiple=4)
-            f0, timeaxis, sp, ap = preprocess.world_decompose(
-                wav=wav, fs=sampling_rate, frame_period=frame_period)
-            f0_converted = preprocess.pitch_conversion(f0=f0,
-                                                       mean_log_src=self.log_f0s_mean_A,
-                                                       std_log_src=self.log_f0s_std_A,
-                                                       mean_log_target=self.log_f0s_mean_B,
-                                                       std_log_target=self.log_f0s_std_B)
-            coded_sp = preprocess.world_encode_spectral_envelop(
-                sp=sp, fs=sampling_rate, dim=num_mcep)
-            coded_sp_transposed = coded_sp.T
-            coded_sp_norm = (coded_sp_transposed -
-                             self.coded_sps_A_mean) / self.coded_sps_A_std
-            coded_sp_norm = np.array([coded_sp_norm])
-
-            if torch.cuda.is_available():
-                coded_sp_norm = torch.from_numpy(coded_sp_norm).cuda().float()
-            else:
-                coded_sp_norm = torch.from_numpy(coded_sp_norm).float()
-
-            coded_sp_converted_norm = self.generator_A2B(coded_sp_norm)
-            coded_sp_converted_norm = coded_sp_converted_norm.cpu().detach().numpy()
-            coded_sp_converted_norm = np.squeeze(coded_sp_converted_norm)
-            coded_sp_converted = coded_sp_converted_norm * \
-                self.coded_sps_B_std + self.coded_sps_B_mean
-            coded_sp_converted = coded_sp_converted.T
-            coded_sp_converted = np.ascontiguousarray(coded_sp_converted)
-            decoded_sp_converted = preprocess.world_decode_spectral_envelop(
-                coded_sp=coded_sp_converted, fs=sampling_rate)
-            wav_transformed = preprocess.world_speech_synthesis(f0=f0_converted,
-                                                                decoded_sp=decoded_sp_converted,
-                                                                ap=ap,
-                                                                fs=sampling_rate,
-                                                                frame_period=frame_period)
-            librosa.output.write_wav(path=os.path.join(output_A_dir,"epoch_"+str(epoch) + "_"+ os.path.basename(file)),
-                                     y=wav_transformed,
-                                     sr=sampling_rate)
-
-
-        # from sm2 to tf1 .. .from 1 to 3
     def validation_from_to_dir(self,epoch=100,from_=1,to=3):
         num_mcep = 24
         sampling_rate = 16000
@@ -576,13 +520,13 @@ class CycleGANTraining:
 
         #persons=["SM2","TF2","SF2"]  # this is the  order of inserting to lists
 
-        persons=["SF2","SM2","TM2"]  # this is the  order of inserting to lists
+        persons=["SM2","SF1","TM1"]  # this is the  order of inserting to lists
 
 
 
         validation_B_dir = self.validation_S_dir +"/" + persons[from_]+"/"
      ### this shhould be out A , the converted voice ... .
-        output_B_dir = self.output_S_dir +"/" + persons[from_]+"/"
+        output_B_dir = self.output_S_dir +"/" + persons[to]+"/"
 
         print("Generating Validation Data "+ persons[to] +" from " + persons[from_])
         #print("Generating Validation Data A from B...")
@@ -705,15 +649,15 @@ if __name__ == '__main__':
         description="Train CycleGAN using source dataset and target dataset")
 
     logf0s_mcep_normalization_default = '../cache_all/logf0s_mcep_normalization_SM2.npz'
-    logf0s_mcep_normalization_traineduser = '../cache_all/logf0s_mcep_normalization_TF2.npz'
-    logf0s_mcep_normalization_newuser = '../cache_all/logf0s_mcep_normalization_SF2.npz'
+    logf0s_mcep_normalization_traineduser = '../cache_all/logf0s_mcep_normalization_TM1.npz'
+    logf0s_mcep_normalization_newuser = '../cache_all/logf0s_mcep_normalization_SF1.npz'
 
 
     coded_sps_0_norm = '../cache_all/coded_sps_norm_SM2.pickle'
 
-    coded_sps_user_norm = '../cache_all/coded_sps_norm_TF2.pickle'
+    coded_sps_user_norm = '../cache_all/coded_sps_norm_TM1.pickle'
 
-    coded_sps_newuser_norm = '../cache_all/coded_sps_norm_SF2.pickle'
+    coded_sps_newuser_norm = '../cache_all/coded_sps_norm_SF1.pickle'
 
 
 
@@ -721,13 +665,10 @@ if __name__ == '__main__':
     #resume_training_at = '../cache_RCGan/model_checkpoint/_CycleGAN_CheckPoint'
     resume_training_at = None
 
-    #validation_A_dir_default = '../data/vcc2016_training/evaluation_rcgan/SF2/'
-    #output_A_dir_default = '../data/vcc2016_training/converted_sound_RCGAN/SF2'
-
 
     # should be now SF2 SM2 TM3 TF1
     validation_S_dir_default = '../data/vcc2016_training/evaluation_RCGAN/'
-    output_S_dir_default = '../data/vcc2016_training/converted_sound_RCGAN_one/'
+    output_S_dir_default = '../data/vcc2016_training/converted_sound_RCGAN_one_2020/'
 
 
 
