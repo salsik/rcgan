@@ -5,9 +5,6 @@
 
 ## here is the first test and standard code from github
 
-
-# now we are trying with other github repos
-
 ###################################################
 
 
@@ -25,7 +22,6 @@ import pickle
 import preprocess
 from trainingDataset import trainingDataset
 from model_GLU import Generator, Discriminator
-#from model_GLU_main import Generator, Discriminator
 
 
 class CycleGANTraining:
@@ -174,14 +170,8 @@ class CycleGANTraining:
 
                 # Generator Loss function
 
-
-               # print(real_A.shape)
-
                 fake_B = self.generator_A2B(real_A)
                 cycle_A = self.generator_B2A(fake_B)
-
-               # print(fake_B.shape)
-               # print(cycle_A.shape)
 
                 fake_A = self.generator_B2A(real_B)
                 cycle_B = self.generator_A2B(fake_A)
@@ -240,11 +230,15 @@ class CycleGANTraining:
 
             # case 1
 
+                #d_fake_A=d_fake_A.cpu().detach().numpy()
+                #d_fake_B=d_fake_B.cpu().detach().numpy()
+                       
+            # case 1 also but another way
 
                # d_fake_A=d_fake_A.detach()
                # d_fake_B=d_fake_B.detach()
 
-            # case 2
+            # case 3 
             
               #  fake_A =fake_A.detach()
               #  fake_B= fake_B.detach()

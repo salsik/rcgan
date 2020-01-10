@@ -4,13 +4,20 @@ import matplotlib.pyplot as plt
 
 import re
 
+import sys
 
-filepath = '../log_store_my_rcgan_160Disc2.txt'
-filepath = 'log_store_case_2.txt'
+
+if(len(sys.argv)==1):
+    filepath = 'log_store_case_2.txt'
+    print('we are printing losses in default file name')
+else:
+    filepath = str(sys.argv[1])
+
+
 
 with open(filepath) as fp:
    line = fp.readline()
-   cnt = 1
+   cnt = 0
 
    gen_losses=[]
    disc_losses=[]
@@ -22,8 +29,9 @@ with open(filepath) as fp:
 
        string=line.strip()
        #print(string)
-
-       if (string.startswith('Iter')):
+       if (string.startswith('Epoch')):
+           cnt+=1
+       if (string.startswith('Iter') and cnt % 3 == 0):
         gen_loss = re.search('Generator Loss:(.*)Discrimator Loss', string).group(1)
         disc_loss = re.search('Discrimator Loss:(.*)GA2B', string).group(1)
         #rad_loss = re.search('radial:(.*)G_cyc', string).group(1)
@@ -38,7 +46,7 @@ with open(filepath) as fp:
         #print(gen_loss,' ',disc_loss,' ',rad_loss,' ',cycle_loss,' ',iden_loss)  
 
        line = fp.readline()
-       cnt += 1
+
     
 #print(gen_losses)
 
@@ -52,6 +60,6 @@ plt.plot(disc_losses)
 
 plt.title('model losses')
 plt.ylabel('loss')
-plt.xlabel('iteration')
+plt.xlabel('Epochs')
 plt.legend(['gen_loss', 'disc_loss','rad','cyc','iden'], loc='upper left')
 plt.show()

@@ -4,13 +4,7 @@
 
 ###############################################
 
-## edited one according to this repo
-
-
-#  https://github.com/aitorzip/PyTorch-CycleGAN
-
-
-
+## the main model_GLU from git
 
 ###################################################
 
@@ -155,7 +149,7 @@ class upSample_Generator(nn.Module):
         return self.convLayer(input) * torch.sigmoid(self.convLayer_gates(input))
 
 
-class Generator_old(nn.Module):
+class Generator(nn.Module):
     def __init__(self):
         super(Generator, self).__init__()
 
@@ -277,7 +271,7 @@ class DownSample_Discriminator(nn.Module):
         return self.convLayer(input) * torch.sigmoid(self.convLayerGates(input))
 
 
-class Discriminator_old(nn.Module):
+class Discriminator(nn.Module):
     def __init__(self):
         super(Discriminator, self).__init__()
 
@@ -354,238 +348,16 @@ class Discriminator_old(nn.Module):
         return fc
 
 
-
-###################################
-
-
-#  https://github.com/aitorzip/PyTorch-CycleGAN
-
-##################################
-
-
-class ResidualBlock11(nn.Module):
-    def __init__(self, in_features):
-        super(ResidualBlock, self).__init__()
-
-        conv_block = [  nn.ReflectionPad2d(1),
-                        nn.Conv2d(in_features, in_features, 3),
-                        nn.InstanceNorm2d(in_features),
-                        nn.ReLU(inplace=True),
-                        nn.ReflectionPad2d(1),
-                        nn.Conv2d(in_features, in_features, 3),
-                        nn.InstanceNorm2d(in_features)  ]
-
-        self.conv_block = nn.Sequential(*conv_block)
-
-    def forward(self, x):
-        return x + self.conv_block(x)
-
-class Generator11(nn.Module):
-    def __init__(self, input_nc=24, output_nc=24, n_residual_blocks=9):
-        super(Generator, self).__init__()
-
-        # Initial convolution block
-        model = [   nn.ReflectionPad2d(3),
-                    nn.Conv2d(input_nc, 64, 7),
-                    nn.InstanceNorm2d(64),
-                    nn.ReLU(inplace=True) ]
-
-        # Downsampling
-        in_features = 64
-        out_features = in_features*2
-        for _ in range(2):
-            model += [  nn.Conv2d(in_features, out_features, 3, stride=2, padding=1),
-                        nn.InstanceNorm2d(out_features),
-                        nn.ReLU(inplace=True) ]
-            in_features = out_features
-            out_features = in_features*2
-
-        # Residual blocks
-        for _ in range(n_residual_blocks):
-            model += [ResidualBlock(in_features)]
-
-        # Upsampling
-        out_features = in_features//2
-        for _ in range(2):
-            model += [  nn.ConvTranspose2d(in_features, out_features, 3, stride=2, padding=1, output_padding=1),
-                        nn.InstanceNorm2d(out_features),
-                        nn.ReLU(inplace=True) ]
-            in_features = out_features
-            out_features = in_features//2
-
-        # Output layer
-        model += [  nn.ReflectionPad2d(3),
-                    nn.Conv2d(64, output_nc, 7),
-                    nn.Tanh() ]
-
-        self.model = nn.Sequential(*model)
-
-    def forward(self, x):
-        return self.model(x)
-
-class Discriminator11(nn.Module):
-    def __init__(self, input_nc):
-        super(Discriminator, self).__init__()
-
-        # A bunch of convolutions one after another
-        model = [   nn.Conv2d(input_nc, 64, 4, stride=2, padding=1),
-                    nn.LeakyReLU(0.2, inplace=True) ]
-
-        model += [  nn.Conv2d(64, 128, 4, stride=2, padding=1),
-                    nn.InstanceNorm2d(128),
-                    nn.LeakyReLU(0.2, inplace=True) ]
-
-        model += [  nn.Conv2d(128, 256, 4, stride=2, padding=1),
-                    nn.InstanceNorm2d(256),
-                    nn.LeakyReLU(0.2, inplace=True) ]
-
-        model += [  nn.Conv2d(256, 512, 4, padding=1),
-                    nn.InstanceNorm2d(512),
-                    nn.LeakyReLU(0.2, inplace=True) ]
-
-        # FCN classification layer
-        model += [nn.Conv2d(512, 1, 4, padding=1)]
-
-        self.model = nn.Sequential(*model)
-
-    def forward(self, x):
-        x =  self.model(x)
-        # Average pooling and flatten
-        return F.avg_pool2d(x, x.size()[2:]).view(x.size()[0], -1)
-
-
-
-###################################
-
-
-#https://github.com/eriklindernoren/PyTorch-GAN/tree/a163b82beff3d01688d8315a3fd39080400e7c01/implementations/cyclegan
-
-
-##################################
-
-
-
-class ResidualBlock(nn.Module):
-    def __init__(self, in_features):
-        super(ResidualBlock, self).__init__()
-
-        self.block = nn.Sequential(
-            #nn.ReflectionPad2d(1),
-            nn.Conv1d(in_features, in_features, 3 ,stride=1, padding=1),
-            nn.InstanceNorm1d(in_features),
-            nn.ReLU(inplace=False),
-            #nn.ReflectionPad2d(1),
-            nn.Conv1d(in_features, in_features, 3,stride=1, padding=1),
-            nn.InstanceNorm1d(in_features),
-        )
-
-    def forward(self, x):
-        return x + self.block(x)
-
-
-
-class Generator(nn.Module):
-    def __init__(self, input_shape= [24], num_residual_blocks=9):
-        super(Generator, self).__init__()
-
-        channels = input_shape[0]
-
-        # Initial convolution block
-        out_features = 64
-        model = [
-            #nn.ReflectionPad2d(channels),
-            nn.Conv1d(channels, out_features, 7),
-            nn.InstanceNorm1d(out_features),
-            nn.ReLU(inplace=True),
-        ]
-        in_features = out_features
-
-        # Downsampling
-        for _ in range(2):
-            out_features *= 2
-            model += [
-                nn.Conv1d(in_features, out_features, 3, stride=2, padding=1),
-                nn.InstanceNorm1d(out_features),
-                nn.ReLU(inplace=True),
-            ]
-            in_features = out_features
-
-        # Residual blocks
-        for _ in range(num_residual_blocks):
-            model += [ResidualBlock(out_features)]
-
-        # Upsampling
-        for _ in range(2):
-            out_features //= 2
-            model += [
-                nn.Upsample(scale_factor=2),
-                nn.Conv1d(in_features, out_features, 3, stride=1, padding=1),
-                nn.InstanceNorm1d(out_features),
-                nn.ReLU(inplace=True),
-            ]
-            in_features = out_features
-
-        # Output layer
-        model += [#nn.ReflectionPad2d(channels),
-                  nn.Conv1d(out_features, channels, 3,stride=1, padding=3), nn.Tanh()]
-
-        self.model = nn.Sequential(*model)
-
-    def forward(self, x):
-        return self.model(x)
-
-
-##############################
-#        Discriminator
-##############################
-
-
-class Discriminator(nn.Module):
-    def __init__(self, input_shape=24):
-        super(Discriminator, self).__init__()
-
-        channels = input_shape
-
-        # Calculate output shape of image discriminator (PatchGAN)
-        #self.output_shape = (1, height // 2 ** 4, width // 2 ** 4)
-
-        def discriminator_block(in_filters, out_filters, normalize=True):
-            """Returns downsampling layers of each discriminator block"""
-            layers = [nn.Conv1d(in_filters, out_filters, 4, stride=2, padding=1)]
-            if normalize:
-                layers.append(nn.InstanceNorm1d(out_filters))
-            layers.append(nn.LeakyReLU(0.2, inplace=True))
-            return layers
-
-        self.model = nn.Sequential(
-            *discriminator_block(channels, 64, normalize=False),
-            *discriminator_block(64, 128),
-            *discriminator_block(128, 256),
-            *discriminator_block(256, 512),
-            #nn.ZeroPad1d((1, 0, 1, 0)),
-            nn.Conv1d(512, 1, 4, padding=1)
-        )
-
-    def forward(self, img):
-        return self.model(img)
-
-
-
 if __name__ == '__main__':
     # Generator Dimensionality Testing
-    #input = torch.randn(10, 24, 1100)  # (N, C_in, Width) For Conv1d
+    input = torch.randn(10, 24, 1100)  # (N, C_in, Width) For Conv1d
     np.random.seed(0)
     print(np.random.randn(10))
-    input = np.random.randn(158, 24,150,50)
+    input = np.random.randn(158, 24, 128)
     input = torch.from_numpy(input).float()
     # print(input)
-
-
-    input = torch.randn(1, 24, 128)
     generator = Generator()
     output = generator(input)
-
-    print("Input shape Generator", input.shape)
     print("Output shape Generator", output.shape)
 
     # Discriminator Dimensionality Testing
